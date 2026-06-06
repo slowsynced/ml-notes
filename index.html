@@ -1,0 +1,873 @@
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Theory — Finals Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="light"] {
+    --bg: #f4eefb; --bg2: #ece3f8;
+    --glass: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.7);
+    --glass-strong: rgba(255,255,255,0.72);
+    --text: #2a1a4a; --text-muted: #6b5b8a;
+    --lav: #c9b8f0; --lav-light: rgba(201,184,240,0.25); --lav-dark: #6b48a8; --lav-mid: #9b77d4;
+    --pink: #f4a7c3; --pink-light: rgba(244,167,195,0.18); --pink-dark: #c43e6e;
+    --green: #1b7a4b; --green-bg: rgba(45,212,150,0.18);
+    --amber: #b45309; --amber-bg: rgba(251,191,36,0.2);
+    --red: #c0392b; --red-bg: rgba(231,76,60,0.16);
+    --shadow: rgba(107,72,168,0.12);
+    --code-bg: rgba(201,184,240,0.3); --code-text: #6b48a8;
+  }
+  :root[data-theme="dark"] {
+    --bg: #15101f; --bg2: #1d1530;
+    --glass: rgba(40,30,65,0.55); --glass-border: rgba(155,119,212,0.25);
+    --glass-strong: rgba(45,33,75,0.72);
+    --text: #ede8fb; --text-muted: #a594c7;
+    --lav: #9b77d4; --lav-light: rgba(155,119,212,0.18); --lav-dark: #c9b8f0; --lav-mid: #b399e0;
+    --pink: #f4a7c3; --pink-light: rgba(244,167,195,0.12); --pink-dark: #f4a7c3;
+    --green: #4ade80; --green-bg: rgba(45,212,150,0.14);
+    --amber: #fbbf24; --amber-bg: rgba(251,191,36,0.14);
+    --red: #f87171; --red-bg: rgba(231,76,60,0.14);
+    --shadow: rgba(0,0,0,0.4);
+    --code-bg: rgba(155,119,212,0.22); --code-text: #c9b8f0;
+  }
+  *,*::before,*::after { box-sizing: border-box; margin:0; padding:0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family:'DM Sans',sans-serif; color:var(--text); font-size:15px; line-height:1.75;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 20%, var(--lav-light), transparent 40%),
+      radial-gradient(circle at 85% 30%, var(--pink-light), transparent 40%),
+      radial-gradient(circle at 50% 80%, var(--lav-light), transparent 45%);
+    background-attachment: fixed;
+    transition: background 0.4s, color 0.4s;
+  }
+
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    display:flex; align-items:center; height:56px; padding:0 1.2rem; gap:0.3rem;
+  }
+  .nav-scroll { display:flex; align-items:center; gap:0.2rem; overflow-x:auto; overflow-y:hidden; flex:1; height:100%; }
+  .nav-scroll::-webkit-scrollbar { height:0; }
+  .nav-brand { font-family:'Playfair Display',serif; font-size:15px; color:var(--lav-dark); white-space:nowrap; margin-right:1rem; flex-shrink:0; font-weight:700; }
+  .nav-link { font-size:12px; font-weight:500; color:var(--text-muted); text-decoration:none; padding:5px 11px; border-radius:18px; white-space:nowrap; flex-shrink:0; transition:all .2s; }
+  .nav-link:hover,.nav-link.active { background:var(--lav-light); color:var(--lav-dark); }
+  .theme-toggle {
+    flex-shrink:0; width:40px; height:40px; border-radius:50%; border:1px solid var(--glass-border);
+    background:var(--glass-strong); color:var(--lav-dark); cursor:pointer; font-size:18px;
+    display:flex; align-items:center; justify-content:center; margin-left:0.5rem; transition:all .25s;
+  }
+  .theme-toggle:hover { transform: rotate(20deg) scale(1.08); }
+
+  .hero { margin-top:56px; position:relative; height:90vh; min-height:480px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .hero-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 28%; filter:brightness(.5) saturate(.85); }
+  .hero-overlay { position:absolute; inset:0; background:linear-gradient(to bottom, rgba(107,72,168,.35), rgba(21,16,31,.78)); }
+  .hero-content { position:relative; z-index:2; text-align:center; padding:2rem; }
+  .hero-eyebrow { font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--pink); font-weight:600; margin-bottom:1rem; }
+  .hero-title { font-family:'Playfair Display',serif; font-size:clamp(3.5rem,11vw,7.5rem); color:#fff; line-height:.95; margin-bottom:.6rem; }
+  .hero-sub { font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(1.1rem,3vw,1.9rem); color:var(--lav); margin-bottom:1.5rem; }
+  .hero-tags { display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin-bottom:1.8rem; max-width:600px; }
+  .hero-tag { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:18px; padding:4px 13px; font-size:11px; backdrop-filter:blur(4px); }
+  .hero-credit { font-size:11px; color:rgba(255,255,255,.55); letter-spacing:.12em; }
+  .scroll-hint { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,.6); font-size:11px; letter-spacing:.1em; z-index:2; animation:bob 2s infinite; }
+  @keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(6px);} }
+
+  main { max-width:840px; margin:0 auto; padding:3.5rem 1.4rem 5rem; }
+
+  .glass {
+    background:var(--glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border:1px solid var(--glass-border); border-radius:18px; box-shadow:0 8px 32px var(--shadow);
+  }
+
+  .intro-card { padding:2rem 2.2rem; margin-bottom:4rem; }
+  .intro-card h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--lav-dark); margin-bottom:1rem; }
+  .intro-card p { margin-bottom:.9rem; }
+
+  .topic { margin-bottom:4.5rem; scroll-margin-top:70px; }
+  .topic-header { display:flex; align-items:center; gap:1rem; margin-bottom:1.6rem; }
+  .topic-num { width:42px; height:42px; border-radius:50%; background:var(--lav-dark); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; flex-shrink:0; box-shadow:0 4px 14px var(--shadow); }
+  .topic-title { font-family:'Playfair Display',serif; font-size:1.7rem; color:var(--lav-dark); line-height:1.1; }
+
+  .cat-box { background:var(--lav-light); border-left:3px solid var(--lav-mid); border-radius:0 14px 14px 0; padding:14px 18px; margin:1.3rem 0; font-style:italic; color:var(--text); backdrop-filter:blur(8px); }
+  .cat-box span { font-weight:600; font-style:normal; color:var(--lav-dark); }
+
+  .card { padding:1.2rem 1.5rem; margin:1rem 0; }
+  .card h4 { font-size:12px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--lav-mid); margin-bottom:10px; }
+
+  .formula { background:linear-gradient(135deg, var(--lav-dark), var(--lav-mid)); color:#fff; border-radius:12px; padding:14px 20px; margin:1rem 0; font-family:'DM Mono',monospace; font-size:14px; text-align:center; line-height:1.85; box-shadow:0 6px 20px var(--shadow); }
+  .formula .label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; opacity:.75; display:block; margin-bottom:5px; }
+
+  code { font-family:'DM Mono',monospace; background:var(--code-bg); color:var(--code-text); padding:1px 6px; border-radius:5px; font-size:13px; }
+
+  .tbl-wrap { overflow-x:auto; margin:1rem 0; border-radius:14px; border:1px solid var(--glass-border); }
+  table { width:100%; border-collapse:collapse; font-size:13px; background:var(--glass); }
+  th { background:var(--lav-light); color:var(--lav-dark); font-weight:600; padding:10px 14px; text-align:left; font-size:12px; }
+  td { padding:9px 14px; border-top:1px solid var(--glass-border); vertical-align:top; }
+
+  h3 { font-size:1rem; font-weight:600; margin:1.3rem 0 .4rem; color:var(--text); }
+  .bullets { list-style:none; padding:0; }
+  .bullets li { padding:4px 0 4px 20px; position:relative; }
+  .bullets li::before { content:'•'; position:absolute; left:6px; color:var(--lav-mid); font-size:16px; }
+
+  .box-answer { background:var(--green-bg); border-left:3px solid var(--green); border-radius:0 10px 10px 0; padding:12px 16px; margin:1rem 0; color:var(--green); font-weight:500; backdrop-filter:blur(6px); }
+  .box-warn { background:var(--amber-bg); border-left:3px solid var(--amber); border-radius:0 10px 10px 0; padding:12px 16px; margin:1rem 0; color:var(--amber); font-size:14px; backdrop-filter:blur(6px); }
+
+  .exam-box { background:var(--pink-light); border:1px solid var(--pink); border-radius:14px; padding:1.2rem 1.5rem; margin:1.4rem 0; backdrop-filter:blur(10px); }
+  .exam-q { font-weight:600; color:var(--pink-dark); margin-bottom:8px; font-size:14px; }
+  .exam-q::before { content:'EXAM Q'; font-size:9px; letter-spacing:.1em; background:var(--pink-dark); color:#fff; padding:2px 8px; border-radius:4px; margin-right:8px; }
+  .exam-a { font-size:14px; }
+  .exam-a::before { content:'ANS'; font-size:9px; letter-spacing:.1em; background:var(--green); color:#fff; padding:2px 8px; border-radius:4px; margin-right:8px; font-weight:600; }
+
+  .steps { }
+  .step { display:flex; gap:14px; margin-bottom:11px; align-items:flex-start; }
+  .step-n { width:28px; height:28px; border-radius:50%; background:var(--lav-dark); color:#fff; font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+
+  .quiz-box { padding:1.2rem 1.5rem; margin:1.4rem 0; border:2px solid var(--lav); }
+  .quiz-label { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:600; color:var(--lav-dark); margin-bottom:8px; }
+  .quiz-q { font-weight:500; margin-bottom:12px; }
+  .quiz-options { display:flex; flex-direction:column; gap:6px; }
+  .quiz-opt { background:var(--glass-strong); border:1px solid var(--glass-border); border-radius:9px; padding:9px 14px; cursor:pointer; font-size:13px; transition:all .2s; text-align:left; color:var(--text); font-family:inherit; }
+  .quiz-opt:hover:not(:disabled) { border-color:var(--lav-mid); background:var(--lav-light); }
+  .quiz-opt.correct { background:var(--green-bg); border-color:var(--green); color:var(--green); }
+  .quiz-opt.wrong { background:var(--red-bg); border-color:var(--red); color:var(--red); }
+  .quiz-feedback { font-size:13px; margin-top:10px; padding:9px 13px; border-radius:9px; display:none; }
+  .quiz-feedback.show { display:block; }
+  .quiz-feedback.ok { background:var(--green-bg); color:var(--green); }
+  .quiz-feedback.nope { background:var(--red-bg); color:var(--red); }
+
+  .divider { height:1px; background:var(--glass-border); margin:2.5rem 0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1rem 0; }
+  @media(max-width:600px){ .grid2{grid-template-columns:1fr;} }
+  .pill { display:inline-block; padding:2px 10px; border-radius:18px; font-size:11px; font-weight:600; }
+  .pill-yes { background:var(--green-bg); color:var(--green); }
+  .pill-no { background:var(--red-bg); color:var(--red); }
+
+  /* FLASHCARD */
+  .flashcard { padding:1.5rem; margin:1.2rem 0; }
+  .flash-scenario { font-size:14px; margin-bottom:14px; line-height:1.7; }
+  .flash-scenario strong { color:var(--lav-dark); }
+  .flash-input { width:100%; min-height:90px; padding:12px 14px; border-radius:12px; border:1px solid var(--glass-border); background:var(--glass-strong); color:var(--text); font-family:inherit; font-size:14px; resize:vertical; transition:border .2s; }
+  .flash-input:focus { outline:none; border-color:var(--lav-mid); }
+  .flash-btns { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .btn { padding:9px 20px; border-radius:10px; border:none; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
+  .btn-primary { background:var(--lav-dark); color:#fff; }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 14px var(--shadow); }
+  .btn-ghost { background:transparent; color:var(--lav-dark); border:1px solid var(--lav); }
+  .btn-ghost:hover { background:var(--lav-light); }
+  .flash-result { margin-top:14px; display:none; }
+  .flash-result.show { display:block; }
+  .flash-verdict { font-weight:600; padding:10px 14px; border-radius:10px; margin-bottom:10px; font-size:14px; }
+  .flash-verdict.pass { background:var(--green-bg); color:var(--green); }
+  .flash-verdict.review { background:var(--amber-bg); color:var(--amber); }
+  .flash-model { background:var(--glass-strong); border-radius:12px; padding:14px 16px; font-size:13.5px; line-height:1.7; border:1px solid var(--glass-border); }
+  .flash-model h5 { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--lav-mid); margin-bottom:8px; }
+  .flash-model code { display:block; margin:3px 0; }
+
+  .vault-header { text-align:center; margin:2rem 0 2.5rem; }
+  .vault-header h2 { font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--lav-dark); }
+  .vault-header p { color:var(--text-muted); font-size:14px; }
+  .vault-tag { display:inline-block; background:var(--pink-dark); color:#fff; font-size:10px; letter-spacing:.1em; padding:3px 12px; border-radius:14px; margin-bottom:12px; }
+
+  .ending { position:relative; height:55vh; min-height:320px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .ending-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 38%; filter:brightness(.45) saturate(.75); }
+  .ending-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(21,16,31,.85), rgba(107,72,168,.35)); }
+  .ending-content { position:relative; z-index:2; text-align:center; }
+  .ending-content h2 { font-family:'Playfair Display',serif; color:#fff; font-size:2.6rem; margin-bottom:.5rem; }
+  .ending-content p { color:var(--lav); font-style:italic; margin-bottom:.6rem; }
+  .ending-content small { color:rgba(255,255,255,.45); font-size:11px; letter-spacing:.15em; }
+
+  strong { font-weight:600; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">ML Theory 🐾</span>
+  <div class="nav-scroll">
+    <a class="nav-link" href="#start">Start Here</a>
+    <a class="nav-link" href="#naive-bayes">Naive Bayes</a>
+    <a class="nav-link" href="#knn">KNN</a>
+    <a class="nav-link" href="#linreg">Linear Reg</a>
+    <a class="nav-link" href="#gd">Gradient Descent</a>
+    <a class="nav-link" href="#logreg">Logistic Reg</a>
+    <a class="nav-link" href="#reg">Regularization</a>
+    <a class="nav-link" href="#svm">SVM</a>
+    <a class="nav-link" href="#dtree">Decision Tree</a>
+    <a class="nav-link" href="#rf">Random Forest</a>
+    <a class="nav-link" href="#kmeans">K-Means</a>
+    <a class="nav-link" href="#pca">PCA</a>
+    <a class="nav-link" href="#nn">Neural Nets</a>
+    <a class="nav-link" href="#eval">Evaluation</a>
+    <a class="nav-link" href="#vault">Exam Vault</a>
+    <a class="nav-link" href="#flash">Flashcards</a>
+    <a class="nav-link" href="#cheat">Cheat Sheet</a>
+  </div>
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" aria-label="toggle theme">🌙</button>
+</nav>
+
+<section class="hero">
+  <img class="hero-img" src="catttttttttttt.png" alt="cat" onerror="this.style.opacity=0">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">finals edition · machine learning</p>
+    <h1 class="hero-title">ML<br>Theory</h1>
+    <p class="hero-sub">taught from zero. solved like your sir asks.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">Naive Bayes</span><span class="hero-tag">KNN</span>
+      <span class="hero-tag">Gradient Descent</span><span class="hero-tag">SVM</span>
+      <span class="hero-tag">Decision Tree</span><span class="hero-tag">Random Forest</span>
+      <span class="hero-tag">PCA</span><span class="hero-tag">K-Means</span>
+      <span class="hero-tag">Neural Nets</span><span class="hero-tag">Evaluation</span>
+    </div>
+    <p class="hero-credit">made by @slowsynced</p>
+  </div>
+  <div class="scroll-hint">scroll to begin ↓</div>
+</section>
+
+<main>
+
+<div class="glass intro-card" id="start">
+  <span class="vault-tag">read this first</span>
+  <h2>okay, what even is machine learning?</h2>
+  <p>Imagine you want to teach a cat to know if a treat is "yummy" or "yucky". You don't write rules. Instead you show it <strong>100 examples</strong> — "this one was yummy, this one was yucky" — and the cat slowly figures out the pattern itself. Next time it sees a new treat, it <em>guesses</em> based on what it learned.</p>
+  <p>That's machine learning: <strong>learning patterns from examples (data) instead of being given explicit rules.</strong></p>
+  <p>There are two big families you need for finals:</p>
+  <ul class="bullets">
+    <li><strong>Supervised learning</strong> — you have labelled examples (treat → yummy/yucky). The model learns to predict the label. Covers: KNN, Naive Bayes, Linear/Logistic Regression, SVM, Decision Trees, Random Forest, Neural Nets.</li>
+    <li><strong>Unsupervised learning</strong> — no labels, just data. The model finds hidden structure. Covers: K-Means (grouping), PCA (simplifying).</li>
+  </ul>
+  <p>Two more words your sir loves:</p>
+  <ul class="bullets">
+    <li><strong>Classification</strong> = predicting a category (cat / dog / yummy / yucky).</li>
+    <li><strong>Regression</strong> = predicting a number (price, grade, temperature).</li>
+  </ul>
+  <p style="margin-top:1rem; color:var(--lav-dark); font-weight:500;">That's it. Every algorithm below is just a different clever way to do one of these. Let's go. 🌸</p>
+</div>
+
+<section class="topic" id="naive-bayes">
+  <div class="topic-header"><div class="topic-num">1</div><h2 class="topic-title">Naive Bayes</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> You see a small, fluffy, meowing thing. You assume each clue (small, fluffy, meows) is a separate independent hint. Combine all hints using probability → it's a Cat.</div>
+  
+<h3>The whole idea</h3>
+<p>For each possible class, ask: "based on these features, how likely is this class?" Multiply probabilities, pick the biggest. It's literally counting and multiplying — no scary math.</p>
+<div class="formula"><span class="label">Bayes Theorem</span>P(Class | Features) ∝ P(Class) × P(f₁|Class) × P(f₂|Class) × ...</div>
+<div class="grid2">
+  <div class="glass card"><h4>Prior P(Class)</h4>How common is this class overall?<br><code>P(Yes)=count(Yes)/total</code></div>
+  <div class="glass card"><h4>Likelihood P(f|Class)</h4>How often this feature shows up in this class<br><code>P(Sunny|Yes)=count(Sunny&Yes)/count(Yes)</code></div>
+</div>
+<h3>Solved — Play Tennis</h3>
+<p>Test: <code>Sunny, Cool, High humidity, Strong wind</code>. 14 days: 9 Yes, 5 No.</p>
+<div class="glass card">
+<p><strong>Priors:</strong> P(Yes)=9/14=0.643, P(No)=5/14=0.357</p>
+<p><strong>Score(Yes)</strong> = 0.643 × (2/9) × (3/9) × (3/9) × (3/9) = <strong>0.00529</strong></p>
+<p><strong>Score(No)</strong> = 0.357 × (3/5) × (1/5) × (4/5) × (3/5) = <strong>0.02057</strong></p>
+<div class="box-answer">No (80%) &gt; Yes (20%) → DO NOT PLAY</div>
+</div>
+<div class="box-warn">⚠ If any probability = 0, the whole product = 0. Fix with <strong>Laplace smoothing</strong>: add 1 to every count.</div>
+<div class="exam-box"><div class="exam-q">Why is it called "Naive"?</div><div class="exam-a">It naively assumes all features are independent of each other given the class. Almost never true in reality, but it works astonishingly well and is super fast — perfect for spam filtering and text classification.</div></div>
+<div class="glass quiz-box"><div class="quiz-label">Quick Check</div><div class="quiz-q">What does P(Cool|No) mean?</div><div class="quiz-options">
+<button class="quiz-opt" onclick="cq(this,0)">Probability it's cool overall</button>
+<button class="quiz-opt" onclick="cq(this,1)">Of the No days, how many were Cool</button>
+<button class="quiz-opt" onclick="cq(this,0)">Probability of No when it's Cool</button>
+</div><div class="quiz-feedback">It's a likelihood: out of the 5 "No" days, the fraction that were Cool = 1/5.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="knn">
+  <div class="topic-header"><div class="topic-num">2</div><h2 class="topic-title">K-Nearest Neighbors (KNN)</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> New song, unknown genre? Find the 3 most similar songs you already know and copy their genre. KNN never 'studies' — it just memorizes everything and compares at the last second.</div>
+  
+<h3>The whole idea</h3>
+<p><strong>Lazy learner</strong>: no training. Store all data. For a new point, find the K closest points and let them vote.</p>
+<div class="formula"><span class="label">Euclidean Distance</span>d = √[(x₁−x₂)² + (y₁−y₂)²]</div>
+<div class="tbl-wrap"><table>
+<tr><th>K</th><th>Effect</th><th>Risk</th></tr>
+<tr><td>1</td><td>Follows every point exactly</td><td>Overfitting (noisy)</td></tr>
+<tr><td>Large</td><td>Very smooth boundary</td><td>Underfitting</td></tr>
+<tr><td>Odd</td><td>Avoids ties</td><td>Always use odd for 2 classes</td></tr>
+</table></div>
+<h3>Solved — classify X=(4,2), K=3</h3>
+<div class="glass card">
+<p>A(1,2)=Cat, B(3,4)=Cat, C(5,1)=Dog, D(4,3)=Dog</p>
+<p><code>d(X,A)=3.00  d(X,B)=2.24  d(X,C)=1.41  d(X,D)=1.00</code></p>
+<p>Nearest 3: D(Dog), C(Dog), B(Cat)</p>
+<div class="box-answer">Vote: Dog 2, Cat 1 → X = DOG 🐕</div>
+</div>
+<div class="box-warn">⚠ <strong>Curse of dimensionality:</strong> with too many features, all distances look equal and KNN breaks. Reduce dimensions first (PCA).</div>
+<div class="exam-box"><div class="exam-q">How does K affect classification?</div><div class="exam-a">Small K = sensitive to local noise/outliers (can flip the answer). Large K = smoother but may absorb other classes and underfit. The same point can get different labels for K=3 vs K=5 — so K matters and should be tuned with cross-validation.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="linreg">
+  <div class="topic-header"><div class="topic-num">3</div><h2 class="topic-title">Linear Regression</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Track treats eaten vs energy level. Draw the single straight line that best fits all your past dots. That line predicts future energy. 'Best' = smallest total error.</div>
+  
+<h3>The whole idea</h3>
+<p>Fit a straight line through the data to predict a <strong>number</strong>.</p>
+<div class="formula"><span class="label">Hypothesis</span>ŷ = θ₀ + θ₁x₁ + θ₂x₂ + ...</div>
+<div class="formula"><span class="label">Cost — Mean Squared Error</span>J = (1/n) Σ(yᵢ − ŷᵢ)²</div>
+<h3>The Normal Equation (closed-form solve)</h3>
+<p>Instead of gradient descent, you can solve directly:</p>
+<div class="formula"><span class="label">Normal Equation</span>θ = (XᵀX)⁻¹ Xᵀy</div>
+<p>X = design matrix (add a column of 1s for the bias θ₀). This is the exact method your sir's car-price question uses — fully solved in the <a href="#vault" style="color:var(--lav-dark);font-weight:600;">Exam Vault</a> below.</p>
+<div class="exam-box"><div class="exam-q">Why add a column of 1s to the design matrix?</div><div class="exam-a">The column of 1s lets the model learn the intercept/bias θ₀ (the base value when all features are 0). Without it, the line is forced through the origin.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="gd">
+  <div class="topic-header"><div class="topic-num">4</div><h2 class="topic-title">Gradient Descent</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> You're blindfolded on a hill and want the lowest valley. Feel the slope under your paws, step downhill a little, repeat. Eventually you reach the bottom = minimum cost.</div>
+  
+<h3>The whole idea</h3>
+<p>An iterative way to find the weights that minimize the cost. Each step moves <strong>opposite</strong> to the slope (gradient).</p>
+<div class="formula"><span class="label">Update Rule</span>w := w − α × (∂J/∂w)</div>
+<p><strong>α</strong> = learning rate (step size).</p>
+<div class="tbl-wrap"><table>
+<tr><th>α</th><th>What happens</th></tr>
+<tr><td>Too small</td><td>Crawls — takes forever to converge</td></tr>
+<tr><td>Too large</td><td>Overshoots — bounces around, diverges</td></tr>
+<tr><td>Just right</td><td>Smooth steady descent</td></tr>
+</table></div>
+<h3>Solved — J(w)=w², w₀=4, α=0.1</h3>
+<div class="glass card">
+<p>Gradient of w² is <code>2w</code>.</p>
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div>Start cost = 4² = 16</div></div>
+<div class="step"><div class="step-n">2</div><div>Iter 1: grad=2(4)=8 → w=4−0.1(8)=<strong>3.2</strong>, cost=3.2²=<strong>10.24</strong></div></div>
+<div class="step"><div class="step-n">3</div><div>Iter 2: grad=2(3.2)=6.4 → w=3.2−0.1(6.4)=<strong>2.56</strong>, cost=2.56²=<strong>6.55</strong></div></div>
+</div>
+<div class="box-answer">Cost: 16 → 10.24 → 6.55 = DECREASING ✓ Gradient descent is working — it's walking toward the minimum.</div>
+</div>
+<div class="box-warn">⚠ In an exam, swap in YOUR given cost function and values. The recipe is always: (1) find gradient, (2) plug into update rule, (3) repeat, (4) check cost is dropping.</div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="logreg">
+  <div class="topic-header"><div class="topic-num">5</div><h2 class="topic-title">Logistic Regression</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Linear regression gives any number. But 'will the cat knock the glass off? yes/no' needs a probability between 0 and 1. Sigmoid squishes the line into that range.</div>
+  
+<div class="box-warn">⚠ Despite the name, this is CLASSIFICATION, not regression!</div>
+<div class="formula"><span class="label">Sigmoid</span>σ(z) = 1 / (1 + e^(−z)),  where z = θ₀ + θ₁x₁ + ...</div>
+<div class="formula"><span class="label">Cost — Log Loss / Cross-Entropy</span>J = −(1/n) Σ[ y·log(ŷ) + (1−y)·log(1−ŷ) ]</div>
+<h3>Decision boundary</h3>
+<p>σ(z) ≥ 0.5 → Class 1 (when z ≥ 0). σ(z) &lt; 0.5 → Class 0. At z=0, σ=0.5 exactly.</p>
+<div class="exam-box"><div class="exam-q">Why Log Loss and not MSE here?</div><div class="exam-a">MSE + sigmoid creates a non-convex cost with many local minima where gradient descent gets stuck. Log loss is convex → one global minimum, always reachable.</div></div>
+<div class="glass quiz-box"><div class="quiz-label">Quick Check</div><div class="quiz-q">σ(0) = ?</div><div class="quiz-options">
+<button class="quiz-opt" onclick="cq(this,0)">0</button>
+<button class="quiz-opt" onclick="cq(this,1)">0.5</button>
+<button class="quiz-opt" onclick="cq(this,0)">1</button>
+</div><div class="quiz-feedback">σ(0)=1/(1+e⁰)=1/2=0.5 — the decision boundary.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="reg">
+  <div class="topic-header"><div class="topic-num">6</div><h2 class="topic-title">Regularization (L1 & L2)</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Ridge: 'keep all your toys but play gentler with each.' Lasso: 'pick your favourite toys, throw the rest out.' Both stop the model obsessing over training data.</div>
+  
+<div class="formula"><span class="label">Ridge (L2)</span>J = Σ(y−ŷ)² + λ Σ wⱼ²</div>
+<div class="formula"><span class="label">Lasso (L1)</span>J = Σ(y−ŷ)² + λ Σ |wⱼ|</div>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Ridge (L2)</th><th>Lasso (L1)</th></tr>
+<tr><td>Weights</td><td>Shrink toward 0, never reach 0</td><td>Can become exactly 0</td></tr>
+<tr><td>Feature selection</td><td>No</td><td>Yes (drops features)</td></tr>
+<tr><td>Use when</td><td>All features matter</td><td>Many useless features</td></tr>
+</table></div>
+<h3>The λ trap (your sir asked this!)</h3>
+<div class="glass card">
+<p><strong>λ very HIGH</strong> → penalty too strong → weights crushed to ~0 → model too simple → <strong>UNDERFITTING</strong> (high bias).</p>
+<p><strong>λ very LOW (→0)</strong> → almost no penalty → weights grow large → model too complex → <strong>OVERFITTING</strong> (high variance).</p>
+<div class="box-answer">Goal: pick a balanced λ via cross-validation — the sweet spot between under and over.</div>
+</div>
+<div class="exam-box"><div class="exam-q">500 features, only ~20 useful. Ridge or Lasso?</div><div class="exam-a">Lasso (L1) — it zeros out the 480 useless features automatically (feature selection), giving a clean sparse model. Ridge would keep all 500.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="svm">
+  <div class="topic-header"><div class="topic-num">7</div><h2 class="topic-title">Support Vector Machine (SVM)</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Separate cats from dogs with a line. Don't draw just any line — draw the one with the WIDEST gap on both sides. The animals sitting right on the gap edges are the 'support vectors'.</div>
+  
+<div class="tbl-wrap"><table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Hyperplane</td><td>The boundary: w·x + b = 0</td></tr>
+<tr><td>Support Vectors</td><td>Closest points — they alone define the boundary</td></tr>
+<tr><td>Margin</td><td>Gap width = 2/|w|</td></tr>
+<tr><td>Hard margin</td><td>Perfect separation, no errors allowed</td></tr>
+<tr><td>Soft margin</td><td>Allows some errors (slack ξ, penalty C)</td></tr>
+</table></div>
+<div class="formula"><span class="label">Objective</span>Minimize ½|w|²  →  maximizes the margin 2/|w|</div>
+<h3>Kernel trick</h3>
+<div class="cat-box"><span>CAT SAYS:</span> Data tangled in 2D? Lift it into 3D with a magic function — now a flat sheet separates it. RBF kernel is your default go-to.</div>
+<div class="tbl-wrap"><table>
+<tr><th>Kernel</th><th>Use for</th></tr>
+<tr><td>Linear</td><td>Already separable by a line</td></tr>
+<tr><td>Polynomial</td><td>Curved boundaries</td></tr>
+<tr><td>RBF ⭐</td><td>Most cases — the default</td></tr>
+</table></div>
+<div class="exam-box"><div class="exam-q">Delete a non-support-vector point — what happens?</div><div class="exam-a">Nothing. Only support vectors define the hyperplane. Removing any other point leaves the model identical. That's why SVM is memory-efficient.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="dtree">
+  <div class="topic-header"><div class="topic-num">8</div><h2 class="topic-title">Decision Tree</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Raining? → umbrella. Cold? → jacket. A flowchart of yes/no questions ending in an answer. Each question is chosen to reduce confusion (impurity) the most.</div>
+  
+<div class="formula"><span class="label">Entropy (disorder)</span>H(S) = −Σ pᵢ log₂(pᵢ)</div>
+<div class="formula"><span class="label">Information Gain</span>IG = H(S) − Σ (|Sᵥ|/|S|) H(Sᵥ)</div>
+<div class="formula"><span class="label">Gini Impurity (faster)</span>Gini = 1 − Σ pᵢ²</div>
+<p>H=0 → pure (all same class). H=1 → max confusion. Pick the feature with the <strong>highest Information Gain</strong> to split on.</p>
+<h3>Solved — Outlook split</h3>
+<div class="glass card">
+<p>14 days (9Y,5N). Sunny(2Y,3N), Overcast(4Y,0N), Rain(3Y,2N).</p>
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div>H(S)=−(9/14)log₂(9/14)−(5/14)log₂(5/14)=<strong>0.940</strong></div></div>
+<div class="step"><div class="step-n">2</div><div>H(Sunny)=0.971, H(Overcast)=0 (pure!), H(Rain)=0.971</div></div>
+<div class="step"><div class="step-n">3</div><div>Weighted=(5/14)0.971+(4/14)0+(5/14)0.971=<strong>0.694</strong></div></div>
+<div class="step"><div class="step-n">4</div><div>IG=0.940−0.694=<strong>0.246</strong></div></div>
+</div>
+<div class="box-answer">Do this for every feature → highest IG becomes the root.</div>
+</div>
+<div class="exam-box"><div class="exam-q">Entropy vs Gini?</div><div class="exam-a">Both measure impurity. Entropy uses logs (slightly more sensitive). Gini uses squares (faster, no log). Results are nearly identical — sklearn defaults to Gini. Either is fine in exams.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="rf">
+  <div class="topic-header"><div class="topic-num">9</div><h2 class="topic-title">Random Forest & Ensembles</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> One cat deciding if it's safe outside = risky. Ask 100 cats and take the majority vote = reliable. Random Forest = 100 decision trees, each on different random data and features, voting together.</div>
+  
+<div class="tbl-wrap"><table>
+<tr><th>Method</th><th>How</th><th>Reduces</th></tr>
+<tr><td>Bagging</td><td>Parallel trees on random samples, vote</td><td>Variance</td></tr>
+<tr><td>Boosting</td><td>Sequential, each fixes prior's errors</td><td>Bias</td></tr>
+</table></div>
+<p><strong>Random Forest = Bagging + random feature subset</strong> at each split (m ≈ √features). Diverse trees → averaging cancels their individual mistakes.</p>
+<div class="grid2">
+<div class="glass card"><h4>OOB Score</h4>~1/3 of samples skipped per tree → use them as free validation.</div>
+<div class="glass card"><h4>Feature Importance</h4>How much each feature reduces impurity across all trees = its importance ranking.</div>
+</div>
+<div class="exam-box"><div class="exam-q">Why beat a single tree?</div><div class="exam-a">A single deep tree overfits (high variance). RF averages many diverse trees, slashing variance while keeping bias low. Plus free OOB validation and feature importance. One of the best off-the-shelf models.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="kmeans">
+  <div class="topic-header"><div class="topic-num">10</div><h2 class="topic-title">K-Means Clustering</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Scatter cats in a room, drop K food bowls randomly. Each cat goes to the nearest bowl. Move each bowl to the center of its cats. Repeat until cats stop switching. Done.</div>
+  
+<div class="box-warn">Unsupervised — no labels. It groups similar points by distance.</div>
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div>Pick K, place K centroids randomly</div></div>
+<div class="step"><div class="step-n">2</div><div><strong>Assign:</strong> each point → nearest centroid</div></div>
+<div class="step"><div class="step-n">3</div><div><strong>Update:</strong> move centroid to mean of its points</div></div>
+<div class="step"><div class="step-n">4</div><div>Repeat 2–3 until nothing moves</div></div>
+</div>
+<div class="formula"><span class="label">Objective (minimize)</span>WCSS = Σ ||xᵢ − μₖ||²</div>
+<h3>Choosing K — Elbow method</h3>
+<p>Plot K vs WCSS. It drops then flattens. The "elbow" bend = best K.</p>
+<div class="box-warn">⚠ Sensitive to initialization (use K-means++), assumes round equal clusters, hurt by outliers.</div>
+<div class="glass quiz-box"><div class="quiz-label">Quick Check</div><div class="quiz-q">K-Means is which type of learning?</div><div class="quiz-options">
+<button class="quiz-opt" onclick="cq(this,0)">Supervised</button>
+<button class="quiz-opt" onclick="cq(this,1)">Unsupervised</button>
+</div><div class="quiz-feedback">Unsupervised — no labels, it finds hidden groups purely from distances.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="pca">
+  <div class="topic-header"><div class="topic-num">11</div><h2 class="topic-title">Principal Component Analysis (PCA)</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> 50 features describe a cat, most overlapping. PCA finds the 2–3 directions where cats differ the MOST and keeps only those. 50 numbers → 3 numbers, 95% of the info kept.</div>
+  
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div>Center data (subtract mean)</div></div>
+<div class="step"><div class="step-n">2</div><div>Covariance matrix: Cov = (1/n−1) ZᵀZ</div></div>
+<div class="step"><div class="step-n">3</div><div>Find eigenvalues + eigenvectors</div></div>
+<div class="step"><div class="step-n">4</div><div>Biggest eigenvalue = PC1 (most variance)</div></div>
+<div class="step"><div class="step-n">5</div><div>Project onto top components</div></div>
+</div>
+<div class="formula"><span class="label">Variance explained</span>by PCk = λₖ / Σλ  (keep until ~95%)</div>
+<p>Your sir's exact PCA problem (size/rooms) is <strong>fully solved</strong> in the <a href="#vault" style="color:var(--lav-dark);font-weight:600;">Exam Vault</a>.</p>
+<div class="exam-box"><div class="exam-q">Eigenvalue = 0 means?</div><div class="exam-a">Zero variance in that direction — that component carries no information, discard it. The data effectively lives in fewer dimensions.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="nn">
+  <div class="topic-header"><div class="topic-num">12</div><h2 class="topic-title">Neural Networks</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Brain cells in layers. Signal goes in, each neuron transforms and passes it forward (forward pass). Wrong answer? Send the error backward to blame and fix each weight (backprop).</div>
+  
+<div class="tbl-wrap"><table>
+<tr><th>Activation</th><th>Use</th></tr>
+<tr><td>Sigmoid</td><td>Output (binary)</td></tr>
+<tr><td>ReLU = max(0,z)</td><td>Hidden layers (default)</td></tr>
+<tr><td>Softmax</td><td>Output (multi-class)</td></tr>
+</table></div>
+<div class="formula"><span class="label">Forward pass</span>zˡ = Wˡaˡ⁻¹ + bˡ  ;  aˡ = f(zˡ)</div>
+<h3>Solved forward pass</h3>
+<div class="glass card">
+<p>x=[0.5,0.8], hidden weights given, sigmoid activation.</p>
+<p><code>z1=0.57 → σ=0.639 ; z1=0.83 → σ=0.696</code></p>
+<p><code>z2 = 0.7(0.639)+0.8(0.696)+0.1 = 1.104 → σ(1.104)=0.751</code></p>
+<div class="box-answer">Output 0.751 &gt; 0.5 → Class 1</div>
+</div>
+<div class="formula"><span class="label">Backprop = chain rule</span>∂L/∂W = ∂L/∂a · ∂a/∂z · ∂z/∂W ;  σ'(z)=σ(z)(1−σ(z))</div>
+<div class="exam-box"><div class="exam-q">Why need activation functions?</div><div class="exam-a">Without them, stacking layers is just one big linear function — can't learn curves like XOR. Non-linear activations let the network learn complex patterns. ReLU avoids vanishing gradients, so it's preferred in hidden layers.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<section class="topic" id="eval">
+  <div class="topic-header"><div class="topic-num">13</div><h2 class="topic-title">Model Evaluation</h2></div>
+  <div class="cat-box"><span>CAT SAYS:</span> Your disease detector says 'healthy' to everyone and scores 99% accuracy — but missed every sick cat. Accuracy lies on imbalanced data. Look at the full confusion matrix.</div>
+  
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Pred Positive</th><th>Pred Negative</th></tr>
+<tr><td><strong>Actual Pos</strong></td><td>TP ✓</td><td>FN (missed)</td></tr>
+<tr><td><strong>Actual Neg</strong></td><td>FP (false alarm)</td><td>TN ✓</td></tr>
+</table></div>
+<div class="tbl-wrap"><table>
+<tr><th>Metric</th><th>Formula</th><th>Reads as</th></tr>
+<tr><td>Accuracy</td><td>(TP+TN)/all</td><td>overall correct</td></tr>
+<tr><td>Precision</td><td>TP/(TP+FP)</td><td>of predicted-yes, how many right</td></tr>
+<tr><td>Recall / TPR</td><td>TP/(TP+FN)</td><td>of actual-yes, how many caught</td></tr>
+<tr><td>F1</td><td>2PR/(P+R)</td><td>balance of P & R</td></tr>
+</table></div>
+<h3>The 0/1 loss (your sir asked!)</h3>
+<div class="glass card">
+<p><strong>0/1 loss</strong> = 0 if prediction correct, 1 if wrong.</p>
+<div class="formula">L(y, ŷ) = 1 if y ≠ ŷ, else 0</div>
+<p><strong>Purpose:</strong> directly counts misclassifications — the most intuitive error measure (it IS the error rate). <strong>Problem:</strong> it's non-differentiable and non-convex, so you can't run gradient descent on it. Used for <em>evaluation</em>, not training.</p>
+</div>
+<div class="exam-box"><div class="exam-q">96% accuracy on cancer detection — why not celebrate?</div><div class="exam-a">If ~96% of patients are healthy, a model that says "healthy" to everyone scores 96% while catching ZERO cancers. Accuracy is misleading on imbalanced data. Fix: report Precision/Recall/F1/AUC, prioritise Recall (don't miss cancers), use the confusion matrix, and resample/oversample the minority class (e.g. SMOTE).</div></div>
+<div class="glass quiz-box"><div class="quiz-label">Quick Check</div><div class="quiz-q">Detector catches 90/100 cancers, falsely flags 50 healthy. Recall = ?</div><div class="quiz-options">
+<button class="quiz-opt" onclick="cq(this,0)">90/140 = 64%</button>
+<button class="quiz-opt" onclick="cq(this,1)">90/(90+10) = 90%</button>
+<button class="quiz-opt" onclick="cq(this,0)">90/150 = 60%</button>
+</div><div class="quiz-feedback">Recall=TP/(TP+FN)=90/(90+10)=90%. The 50 false alarms hurt Precision, not Recall.</div></div>
+
+</section>
+<div class="divider"></div>
+
+<!-- EXAM VAULT -->
+<section id="vault">
+  <div class="vault-header">
+    <span class="vault-tag">solved in your sir's exact style</span>
+    <h2>🔐 Exam Vault</h2>
+    <p>Real question formats, fully worked. This is your GPA insurance.</p>
+  </div>
+
+  <div class="glass card" style="padding:1.4rem 1.6rem; margin-bottom:1.4rem;">
+    <h4 style="color:var(--pink-dark);">V1 · Gradient Descent — 2 iterations</h4>
+    <p>An analyst reduces prediction error using Gradient Descent. Cost J(w)=w², initial w=4, learning rate α=0.1. Do 2 iterations, find updated weights, and say if cost is rising or falling.</p>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; color:var(--lav-dark); font-weight:600; font-size:14px; list-style:none;">▸ Tap to reveal full solution</summary>
+      <div style="margin-top:14px;">
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div><strong>Gradient:</strong> J=w² so ∂J/∂w = <code>2w</code></div></div>
+<div class="step"><div class="step-n">2</div><div><strong>Iteration 1:</strong> grad=2(4)=8 → w=4−0.1×8=<strong>3.2</strong>. New cost=3.2²=<strong>10.24</strong> (was 16)</div></div>
+<div class="step"><div class="step-n">3</div><div><strong>Iteration 2:</strong> grad=2(3.2)=6.4 → w=3.2−0.1×6.4=<strong>2.56</strong>. New cost=2.56²=<strong>6.55</strong></div></div>
+<div class="step"><div class="step-n">4</div><div><strong>Cost:</strong> 16 → 10.24 → 6.55 = <strong>DECREASING</strong> ✓</div></div>
+<div class="step"><div class="step-n">5</div><div><strong>Why it helps:</strong> each step moves the weight opposite to the slope, walking downhill toward the minimum cost. Lower cost = smaller prediction error = better model.</div></div>
+</div>
+<div class="box-warn">⚠ In your actual paper, plug in the cost function and numbers they give — the recipe is identical.</div>
+</div>
+    </details>
+  </div>
+
+  <div class="glass card" style="padding:1.4rem 1.6rem; margin-bottom:1.4rem;">
+    <h4 style="color:var(--pink-dark);">V2 · PCA — size vs rooms</h4>
+    <p>X (size in kanal) = [5, 3, 10, 2], Y (rooms) = [10, 7, 15, 4]. Find means, covariance matrix, eigenvalues, eigenvectors, and choose the principal component.</p>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; color:var(--lav-dark); font-weight:600; font-size:14px; list-style:none;">▸ Tap to reveal full solution</summary>
+      <div style="margin-top:14px;">
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div><strong>Means:</strong> X̄=(5+3+10+2)/4=<strong>5</strong>, Ȳ=(10+7+15+4)/4=<strong>9</strong></div></div>
+<div class="step"><div class="step-n">2</div><div><strong>Centered:</strong> Xc=[0,−2,5,−3], Yc=[1,−2,6,−5]</div></div>
+<div class="step"><div class="step-n">3</div><div><strong>Covariance (÷ n−1 = 3):</strong><br>
+Var(X)=(0+4+25+9)/3=<strong>12.67</strong><br>
+Var(Y)=(1+4+36+25)/3=<strong>22</strong><br>
+Cov(X,Y)=(0+4+30+15)/3=<strong>16.33</strong><br>
+Matrix = [[12.67, 16.33],[16.33, 22]]</div></div>
+<div class="step"><div class="step-n">4</div><div><strong>Eigenvalues</strong> — solve λ²−(trace)λ+det=0:<br>
+trace=34.67, det=12.67×22−16.33²=12.07<br>
+λ²−34.67λ+12.07=0 → <strong>λ₁=34.32, λ₂=0.35</strong></div></div>
+<div class="step"><div class="step-n">5</div><div><strong>Eigenvector for λ₁=34.32:</strong> (12.67−34.32)v₁+16.33v₂=0 → v₂=1.326v₁ → v=[1,1.326] normalized = <strong>[0.60, 0.80]</strong></div></div>
+<div class="step"><div class="step-n">6</div><div><strong>Choose PC:</strong> PC1 explains 34.32/(34.32+0.35)=<strong>99%</strong> of variance → keep only PC1, drop PC2.</div></div>
+</div>
+<div class="box-answer">First principal component direction ≈ [0.60, 0.80], capturing 99% of the variance.</div>
+</div>
+    </details>
+  </div>
+
+  <div class="glass card" style="padding:1.4rem 1.6rem; margin-bottom:1.4rem;">
+    <h4 style="color:var(--pink-dark);">V3 · KNN — K=3 vs K=5</h4>
+    <p>Points: A(1,2)=C1, B(2,3)=C1, C(3,3)=C2, D(6,5)=C2, E(7,7)=C2. Classify P=(3,2) with K=3 and K=5 using Euclidean distance. Comment on how K affects it.</p>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; color:var(--lav-dark); font-weight:600; font-size:14px; list-style:none;">▸ Tap to reveal full solution</summary>
+      <div style="margin-top:14px;">
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div><strong>Distances from P(3,2):</strong><br>
+d(P,A)=√(4+0)=<strong>2.00</strong> (C1)<br>
+d(P,B)=√(1+1)=<strong>1.41</strong> (C1)<br>
+d(P,C)=√(0+1)=<strong>1.00</strong> (C2)<br>
+d(P,D)=√(9+9)=<strong>4.24</strong> (C2)<br>
+d(P,E)=√(16+25)=<strong>6.40</strong> (C2)</div></div>
+<div class="step"><div class="step-n">2</div><div><strong>Sorted:</strong> C(1.00,C2), B(1.41,C1), A(2.00,C1), D(4.24,C2), E(6.40,C2)</div></div>
+<div class="step"><div class="step-n">3</div><div><strong>K=3:</strong> C, B, A → C2=1, C1=2 → <strong>Class 1</strong></div></div>
+<div class="step"><div class="step-n">4</div><div><strong>K=5:</strong> all five → C1=2, C2=3 → <strong>Class 2</strong></div></div>
+</div>
+<div class="box-answer">K matters! K=3 → C1 but K=5 → C2. Small K is swayed by the nearest few points; larger K considers a wider neighbourhood and can flip the result. Tune K with cross-validation.</div>
+</div>
+    </details>
+  </div>
+
+  <div class="glass card" style="padding:1.4rem 1.6rem; margin-bottom:1.4rem;">
+    <h4 style="color:var(--pink-dark);">V4 · Linear Regression — car prices</h4>
+    <p>Cars: (Age,Mileage,Price) = (2,20,28), (4,50,20), (5,80,15). Build design matrix X & target y, find θ₀,θ₁,θ₂, then predict price for a 3-year-old car with 40,000 km.</p>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; color:var(--lav-dark); font-weight:600; font-size:14px; list-style:none;">▸ Tap to reveal full solution</summary>
+      <div style="margin-top:14px;">
+<div class="steps">
+<div class="step"><div class="step-n">1</div><div><strong>Design matrix (1s column for bias):</strong><br>
+X=[[1,2,20],[1,4,50],[1,5,80]], y=[28,20,15]</div></div>
+<div class="step"><div class="step-n">2</div><div><strong>Solve θ=(XᵀX)⁻¹Xᵀy.</strong> With 3 equations &amp; 3 unknowns, subtract equations:<br>
+(2)−(1): 2θ₁+30θ₂=−8<br>
+(3)−(2): θ₁+30θ₂=−5 → subtract → 15θ₂=−1 → <strong>θ₂=−0.0667</strong></div></div>
+<div class="step"><div class="step-n">3</div><div>Back-substitute: <strong>θ₁=−3</strong>, <strong>θ₀=35.33</strong></div></div>
+<div class="step"><div class="step-n">4</div><div><strong>Model:</strong> Price = 35.33 − 3(Age) − 0.0667(Mileage)</div></div>
+<div class="step"><div class="step-n">5</div><div><strong>Predict (Age=3, Mileage=40):</strong> 35.33 − 9 − 2.67 = <strong>23.67</strong></div></div>
+</div>
+<div class="box-answer">Predicted price ≈ $23.67k (about $23,670). Makes sense — older + higher mileage = cheaper.</div>
+</div>
+    </details>
+  </div>
+
+  <div class="glass card" style="padding:1.4rem 1.6rem; margin-bottom:1.4rem;">
+    <h4 style="color:var(--pink-dark);">V5 · Confusion Matrix — compare 2 classifiers</h4>
+    <p>600 people. Classifier A: TP=202, FP=100, FN=104, TN=194. Classifier B: TP=199, FP=97, FN=114, TN=190. Compare on TPR, F1, Accuracy.</p>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; color:var(--lav-dark); font-weight:600; font-size:14px; list-style:none;">▸ Tap to reveal full solution</summary>
+      <div style="margin-top:14px;">
+<div class="steps">
+<div class="step"><div class="step-n">A</div><div><strong>Classifier A:</strong><br>
+TPR=202/(202+104)=<strong>66.0%</strong><br>
+Precision=202/(202+100)=66.9%<br>
+F1=2(0.669×0.660)/(0.669+0.660)=<strong>66.4%</strong><br>
+Accuracy=(202+194)/600=<strong>66.0%</strong></div></div>
+<div class="step"><div class="step-n">B</div><div><strong>Classifier B:</strong><br>
+TPR=199/(199+114)=<strong>63.6%</strong><br>
+Precision=199/(199+97)=67.2%<br>
+F1=2(0.672×0.636)/(0.672+0.636)=<strong>65.4%</strong><br>
+Accuracy=(199+190)/600=<strong>64.8%</strong></div></div>
+</div>
+<div class="tbl-wrap"><table>
+<tr><th>Metric</th><th>A</th><th>B</th><th>Winner</th></tr>
+<tr><td>TPR</td><td>66.0%</td><td>63.6%</td><td>A</td></tr>
+<tr><td>F1</td><td>66.4%</td><td>65.4%</td><td>A</td></tr>
+<tr><td>Accuracy</td><td>66.0%</td><td>64.8%</td><td>A</td></tr>
+</table></div>
+<div class="box-answer">Classifier A wins on all three → A is preferable for identifying ChatGPT users.</div>
+</div>
+    </details>
+  </div>
+
+  <div class="glass card" style="padding:1.4rem 1.6rem; margin-bottom:1.4rem;">
+    <h4 style="color:var(--pink-dark);">V6 · Regularization λ + 0/1 loss + accuracy trap</h4>
+    <p>The three short Q1 theory parts your sir asked.</p>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer; color:var(--lav-dark); font-weight:600; font-size:14px; list-style:none;">▸ Tap to reveal full solution</summary>
+      <div style="margin-top:14px;">
+<h3>I. Impact of λ</h3>
+<p><strong>Very high λ:</strong> over-penalizes weights → forces them near 0 → model too simple → <strong>underfitting</strong> (high bias). <strong>Very low λ:</strong> barely penalizes → weights grow → model too complex → <strong>overfitting</strong> (high variance). Balanced λ via cross-validation = best.</p>
+<h3>II. 0/1 loss</h3>
+<p>L=0 if correct, 1 if wrong. Formula: <code>L(y,ŷ)=1 if y≠ŷ else 0</code>. Purpose: directly counts misclassifications = intuitive error rate. But non-differentiable/non-convex → used for evaluation, not gradient-based training.</p>
+<h3>III. 96% cancer accuracy</h3>
+<p>On imbalanced data (mostly healthy), predicting "healthy" always scores ~96% yet catches no cancer. Accuracy misleads. Use Precision/Recall/F1/AUC, prioritise Recall, check the confusion matrix, and oversample the minority class (SMOTE).</p>
+</div>
+    </details>
+  </div>
+</section><div class="divider"></div>
+<section id="flash">
+  <div class="vault-header">
+    <span class="vault-tag">type your answer · get instant feedback</span>
+    <h2>🎴 Scenario Flashcards</h2>
+    <p>Type what you think, hit Check. If you nailed the key ideas it says so — otherwise it walks you through it.</p>
+  </div>
+  <div id="flashContainer"></div>
+</section>
+<div class="divider"></div>
+
+<section id="cheat">
+  <div class="vault-header"><h2>📋 Master Cheat Sheet</h2><p>The night-before glance. 🌸</p></div>
+  <div class="glass card" style="padding:1.5rem 1.8rem;">
+    <h4>Algorithm one-liners</h4>
+    <div class="tbl-wrap"><table>
+    <tr><th>Algorithm</th><th>One-line memory hook</th></tr>
+    <tr><td>KNN</td><td>Vote of K nearest points (lazy, no training)</td></tr>
+    <tr><td>Naive Bayes</td><td>Multiply P(class)×likelihoods, biggest wins</td></tr>
+    <tr><td>Linear Reg</td><td>Best-fit line, minimize MSE, θ=(XᵀX)⁻¹Xᵀy</td></tr>
+    <tr><td>Logistic Reg</td><td>Sigmoid → probability → classify (NOT regression)</td></tr>
+    <tr><td>SVM</td><td>Widest-margin hyperplane, only support vectors matter</td></tr>
+    <tr><td>Decision Tree</td><td>Split on highest Information Gain</td></tr>
+    <tr><td>Random Forest</td><td>Many trees vote, reduces variance</td></tr>
+    <tr><td>K-Means</td><td>Assign to nearest centroid, move centroid, repeat</td></tr>
+    <tr><td>PCA</td><td>Keep directions of biggest variance (top eigenvalues)</td></tr>
+    <tr><td>Neural Net</td><td>Forward pass predicts, backprop fixes weights</td></tr>
+    </table></div>
+    <h4 style="margin-top:1.5rem;">Key formulas</h4>
+    <div class="tbl-wrap"><table>
+    <tr><th>Formula</th><th>What</th></tr>
+    <tr><td>w := w − α·∂J/∂w</td><td>Gradient descent</td></tr>
+    <tr><td>σ(z)=1/(1+e⁻ᶻ)</td><td>Sigmoid</td></tr>
+    <tr><td>P(C|X) ∝ P(C)·ΠP(xᵢ|C)</td><td>Naive Bayes</td></tr>
+    <tr><td>H=−Σpᵢlog₂pᵢ</td><td>Entropy</td></tr>
+    <tr><td>IG=H(S)−Σ(|Sv|/|S|)H(Sv)</td><td>Information gain</td></tr>
+    <tr><td>Gini=1−Σpᵢ²</td><td>Gini impurity</td></tr>
+    <tr><td>Margin=2/|w|</td><td>SVM margin</td></tr>
+    <tr><td>F1=2PR/(P+R)</td><td>F1 score</td></tr>
+    <tr><td>Recall=TP/(TP+FN)</td><td>Catch rate</td></tr>
+    <tr><td>Precision=TP/(TP+FP)</td><td>Hit accuracy</td></tr>
+    </table></div>
+    <h4 style="margin-top:1.5rem;">⚠ Traps that lose marks</h4>
+    <ul class="bullets">
+    <li>Logistic Regression = classification (name is a lie)</li>
+    <li>Naive Bayes zero → Laplace smoothing (+1)</li>
+    <li>Ridge never zeros weights · Lasso can (feature selection)</li>
+    <li>High λ → underfit · Low λ → overfit</li>
+    <li>Entropy 0 = pure node · Entropy 1 = max chaos</li>
+    <li>SVM: only support vectors define the boundary</li>
+    <li>PCA eigenvalue 0 = useless direction, drop it</li>
+    <li>96% accuracy on imbalanced data = meaningless, use F1/Recall</li>
+    <li>KNN: K=1 overfits, big K underfits, use odd K</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<section class="ending">
+  <img class="ending-img" src="1780750900936_image.png" alt="cat" onerror="this.style.opacity=0">
+  <div class="ending-overlay"></div>
+  <div class="ending-content">
+    <h2>you got this 🌸</h2>
+    <p>one topic at a time. Switzerland is waiting.</p>
+    <small>made by @slowsynced</small>
+  </div>
+</section>
+
+<script>
+function toggleTheme(){
+  const r=document.documentElement;
+  const next = r.getAttribute('data-theme')==='light'?'dark':'light';
+  r.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').textContent = next==='light'?'🌙':'☀️';
+  try{ localStorage.setItem('mltheme',next); }catch(e){}
+}
+try{ const saved=localStorage.getItem('mltheme'); if(saved){ document.documentElement.setAttribute('data-theme',saved); document.getElementById('themeBtn').textContent=saved==='light'?'🌙':'☀️'; } }catch(e){}
+
+function cq(btn, correct){
+  const box=btn.closest('.quiz-box');
+  box.querySelectorAll('.quiz-opt').forEach(o=>o.disabled=true);
+  const fb=box.querySelector('.quiz-feedback');
+  if(correct){ btn.classList.add('correct'); fb.classList.add('show','ok'); }
+  else { btn.classList.add('wrong'); fb.classList.add('show','nope'); 
+    box.querySelectorAll('.quiz-opt').forEach(o=>{ if(o.getAttribute('onclick').includes(',1)')) o.classList.add('correct'); }); }
+}
+
+// Flashcards
+const flashcards = [
+ { id:'f1', topic:'Naive Bayes',
+   scenario:"A spam filter sees an email with the words 'free', 'winner', 'click'. Explain how Naive Bayes decides if it's spam, and why it's called 'naive'.",
+   keywords:['probability','prior','likelihood','multiply','independent','class','spam'],
+   model:"Naive Bayes computes a score for each class: P(spam)×P(free|spam)×P(winner|spam)×P(click|spam), and the same for 'not spam'. The bigger score wins. It's 'naive' because it ASSUMES all words are independent of each other given the class — unrealistic but works great for text." },
+ { id:'f2', topic:'KNN',
+   scenario:"You classify a new point with K=3 and get Class A, but with K=7 you get Class B. Explain what's happening and which K is more reliable.",
+   keywords:['neighbor','distance','overfit','underfit','noise','vote','cross-validation','tune'],
+   model:"Different K values count different numbers of neighbours, so the majority vote changes. Small K (3) is sensitive to the closest few points and can be swayed by noise/outliers. Larger K (7) smooths over a wider area but may underfit. Neither is automatically right — use cross-validation to pick the K with best validation accuracy." },
+ { id:'f3', topic:'Regularization',
+   scenario:"Your model fits training data perfectly but performs terribly on the test set. You're using Ridge regression. What does increasing λ do, and what's the risk of setting it too high?",
+   keywords:['overfit','penalty','shrink','weight','underfit','bias','variance','simpl'],
+   model:"Fitting train perfectly but failing on test = overfitting (high variance). Increasing λ adds a stronger penalty on large weights, shrinking them and simplifying the model — reducing overfitting. But if λ is TOO high, weights get crushed toward zero, the model becomes too simple and underfits (high bias). Pick λ via cross-validation." },
+ { id:'f4', topic:'Evaluation',
+   scenario:"A fraud detector reports 99% accuracy. Your manager is thrilled. Why should you be cautious, and what metrics would you check instead?",
+   keywords:['imbalance','accuracy','misleading','recall','precision','f1','minority','confusion'],
+   model:"Fraud is rare, so the data is imbalanced — predicting 'not fraud' for everyone already scores ~99% while catching zero fraud. Accuracy is misleading here. Check Precision, Recall (especially — you must catch fraud), F1, and AUC, and look at the full confusion matrix. Consider resampling the minority class." },
+ { id:'f5', topic:'SVM',
+   scenario:"After training an SVM, your colleague deletes some 'unimportant' data points far from the boundary to save memory. Will the model change? Explain.",
+   keywords:['support vector','boundary','hyperplane','margin','closest','no change','define'],
+   model:"If the deleted points are NOT support vectors (they're far from the boundary), the model does NOT change at all. Only support vectors — the points closest to the hyperplane — define the boundary and margin. Removing non-support-vectors is completely safe. (But deleting an actual support vector WOULD shift the hyperplane.)" },
+ { id:'f6', topic:'Gradient Descent',
+   scenario:"Your training loss is bouncing up and down wildly and never settling. Your friend says 'just train longer.' What's the actual likely cause and fix?",
+   keywords:['learning rate','too high','large','overshoot','diverge','reduce','alpha','smaller'],
+   model:"Bouncing/diverging loss usually means the learning rate α is too high — each step overshoots the minimum and jumps to the other side. Training longer won't help. The fix is to REDUCE the learning rate so steps are smaller and descent is smooth and stable." },
+ { id:'f7', topic:'Decision Tree',
+   scenario:"Building a decision tree, one candidate split gives child nodes that are all pure (each child = one single class). Is this a good split? What's its entropy and information gain like?",
+   keywords:['pure','entropy','zero','information gain','high','best','reduce'],
+   model:"Yes — this is an excellent split. Pure children have entropy = 0 (no disorder). Since the parent had some entropy and the children have zero, the Information Gain is maximised. The tree-building algorithm will favour exactly this kind of high-IG split." },
+ { id:'f8', topic:'PCA',
+   scenario:"After PCA on a 2-feature dataset, you get eigenvalues λ₁=34.3 and λ₂=0.35. How many components should you keep and why?",
+   keywords:['one','pc1','variance','99','large','discard','small','drop','largest'],
+   model:"Keep just ONE component (PC1). It explains 34.3/(34.3+0.35) ≈ 99% of the total variance. PC2's eigenvalue (0.35) is tiny — it carries almost no information, so you discard it. You've reduced 2D to 1D while keeping 99% of the structure." },
+];
+
+const fc = document.getElementById('flashContainer');
+flashcards.forEach(card=>{
+  const div=document.createElement('div');
+  div.className='glass flashcard';
+  div.innerHTML = `
+    <div class="quiz-label" style="color:var(--pink-dark)">${card.topic}</div>
+    <div class="flash-scenario">${card.scenario}</div>
+    <textarea class="flash-input" id="${card.id}_in" placeholder="Type your answer here... (a few sentences is enough)"></textarea>
+    <div class="flash-btns">
+      <button class="btn btn-primary" onclick="checkFlash('${card.id}')">Check my answer</button>
+      <button class="btn btn-ghost" onclick="revealFlash('${card.id}')">Just show me the answer</button>
+    </div>
+    <div class="flash-result" id="${card.id}_res"></div>`;
+  fc.appendChild(div);
+});
+
+function gradeFlash(id){
+  const card=flashcards.find(c=>c.id===id);
+  const ans=document.getElementById(id+'_in').value.toLowerCase();
+  let hits=0;
+  card.keywords.forEach(k=>{ if(ans.includes(k.toLowerCase())) hits++; });
+  const ratio = hits/card.keywords.length;
+  return {ratio, hits, total:card.keywords.length, card};
+}
+
+function checkFlash(id){
+  const ans=document.getElementById(id+'_in').value.trim();
+  const res=document.getElementById(id+'_res');
+  if(ans.length<10){ res.className='flash-result show'; res.innerHTML='<div class="flash-verdict review">Type a bit more first 🌸 — even a rough attempt helps you learn.</div>'; return; }
+  const g=gradeFlash(id);
+  const pass = g.ratio>=0.34;
+  res.className='flash-result show';
+  res.innerHTML = `
+    <div class="flash-verdict ${pass?'pass':'review'}">${pass?'✓ Nice! You hit the key ideas ('+g.hits+'/'+g.total+' concepts).':'△ Close — you mentioned '+g.hits+'/'+g.total+' key ideas. Study the model answer below.'}</div>
+    <div class="flash-model"><h5>Model answer</h5>${g.card.model}</div>`;
+}
+function revealFlash(id){
+  const card=flashcards.find(c=>c.id===id);
+  const res=document.getElementById(id+'_res');
+  res.className='flash-result show';
+  res.innerHTML=`<div class="flash-model"><h5>Model answer</h5>${card.model}</div>`;
+}
+
+// nav active state
+const links=document.querySelectorAll('.nav-link');
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector('.nav-link[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}})},{rootMargin:'-30% 0px -60% 0px'});
+document.querySelectorAll('section[id], div[id="start"]').forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
